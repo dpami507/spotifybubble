@@ -1,0 +1,18 @@
+.file-upload
+{
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 1;
+
+    color: white;
+}
+.graph-err
+{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+}
