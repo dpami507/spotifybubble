@@ -121,39 +121,34 @@ function App() {
     console.log("Loading data to maps");
     data?.forEach((song) => {
       let key = song.master_metadata_track_name + song.master_metadata_album_artist_name;
-      if(!songMap.has(key))
-      {
+      const isNewSong = !songMap.has(key);
+
+      if(isNewSong) {
         songMap.set(key, [1, song.ms_played, song.master_metadata_track_name, song.master_metadata_album_artist_name]);
-
-        totalListenTimeRef.current += song.ms_played;
-
-        if(song.master_metadata_track_name !== null)
-        {
-          let artists = song.master_metadata_album_artist_name.split(', ');
-          artists.forEach((artist) => {
-            if(artistMap.has(artist))
-            {
-              let data = artistMap.get(artist); // Get data
-              let list = data[1];               // Get the list of songs
-              let timePlayed = data[0];         // Get the time played
-              timePlayed += song.ms_played;
-
-              list.push(key);
-              artistMap.set(artist, [timePlayed, list]);
-            }
-            else
-            {
-              artistMap.set(artist, [song.ms_played, [key]]);
-            }
-          })
-        }
       }
-      else
+      else {
+        const theSong = songMap.get(key);
+        songMap.set(key, [theSong[0] + 1, theSong[1] + song.ms_played, theSong[2], theSong[3]]);
+      }
+
+      // now counts every play, not just the first
+      totalListenTimeRef.current += song.ms_played;
+
+      if(song.master_metadata_track_name)
       {
-        let theSong = songMap.get(key);
-        let newPlays = theSong[0] + 1;
-        let newPlayTime = theSong[1] + song.ms_played;
-        songMap.set(key, [newPlays, newPlayTime, song.master_metadata_track_name, song.master_metadata_album_artist_name])
+        const artists = song.master_metadata_album_artist_name.split(', ');
+        artists.forEach((artist) => {
+          if(artistMap.has(artist)) {
+            const data = artistMap.get(artist); // Get data
+            const list = data[1];               // Get the list of songs
+
+            if(isNewSong) list.push(key);
+            artistMap.set(artist, [data[0] + song.ms_played, list]);
+          } else
+          {
+            artistMap.set(artist, [song.ms_played, [key]]);
+          }
+        })
       }
     });
   }
