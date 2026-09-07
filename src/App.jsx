@@ -40,7 +40,7 @@ function FileLoader({ onFilesLoaded }) {
   };
 
   return (
-      <div className="file-upload">
+      <div className="file-loader">
         <input type="file" accept=".json" multiple onChange={handleFileChange} />
       </div>
   )
@@ -68,14 +68,49 @@ function GraphComponent({data}) {
     )
   }
 }
+function DataComponent({data})
+{
+  if(!data || data.length <= 0)
+  {
+    return (<div></div>);
+  }
+  const topListenArtists = data[0];
+  const topSongArtists = data[1];
+  const topSongs = data[2];
+
+  return (
+      <div className="data-container">
+        <ol>
+          <h3>Top Artists (Listen Time)</h3>
+          {topListenArtists.map((item, index) => (
+            <li key={index}>{item[0]} - {Math.round((item[1][0] / 1000) / 60)} min</li>
+          ))}
+        </ol>
+        <ol>
+          <h3>Top Artists (Song Count)</h3>
+          {topSongArtists.map((item, index) => (
+              <li key={index}>{item[0]} - {item[1][1].length} songs</li>
+          ))}
+        </ol>
+        <ol>
+          <h3>Top Songs</h3>
+          {topSongs.map((item, index) => (
+              <li key={index}>{item[1][2]} - {item[1][0]}x</li>
+          ))}
+        </ol>
+      </div>
+  )
+}
 
 function App() {
 
   const [createdData, setCreatedData] = useState({});
-  let totalListenTime = 0;
+  const totalListenTimeRef = useRef(0);
+  const topDataRef = useRef([]);
 
-  // useRef persists across renders instead of being recreated each time
+  //(trackName + artistName, [playCount, playTime, trackName, artistName])
   const songMapRef = useRef(new Map());
+  //(artist, [timePlayed, [listOfSongs]])
   const artistMapRef = useRef(new Map());
 
   function loadDataToMaps(data)
@@ -90,7 +125,7 @@ function App() {
       {
         songMap.set(key, [1, song.ms_played, song.master_metadata_track_name, song.master_metadata_album_artist_name]);
 
-        totalListenTime += song.ms_played;
+        totalListenTimeRef.current += song.ms_played;
 
         if(song.master_metadata_track_name !== null)
         {
@@ -98,13 +133,17 @@ function App() {
           artists.forEach((artist) => {
             if(artistMap.has(artist))
             {
-              let list = artistMap.get(artist);
+              let data = artistMap.get(artist); // Get data
+              let list = data[1];               // Get the list of songs
+              let timePlayed = data[0];         // Get the time played
+              timePlayed += song.ms_played;
+
               list.push(key);
-              artistMap.set(artist, list);
+              artistMap.set(artist, [timePlayed, list]);
             }
             else
             {
-              artistMap.set(artist, [key]);
+              artistMap.set(artist, [song.ms_played, [key]]);
             }
           })
         }
@@ -131,7 +170,8 @@ function App() {
 
     nodes.push({id: "origin", name: "origin", val: 1});
 
-    artistMap.forEach((songs, artist) => {
+    artistMap.forEach((data, artist) => {
+      let songs = data[1];
       let artistStr = `${artist} (${songs.length})`
       let artistNode = {id: artist, name: artistStr, val: songs.length, color: "grey"};
       nodes.push(artistNode);
@@ -152,6 +192,29 @@ function App() {
     return {nodes, links}
   }
 
+  function findTopVariables()
+  {
+    // Top artists based on playTime
+    const topListenArtists = [...artistMapRef.current]
+        .sort((a, b) => b[1][0] - a[1][0])
+        .slice(0, 10);
+
+    // Top artists based on song count
+    const topSongArtists = [...artistMapRef.current]
+        .sort((a, b) => b[1][1].length - a[1][1].length)
+        .slice(0, 10);
+
+    // Top songs based on play count
+    const topSongs = [...songMapRef.current]
+        .sort((a, b) => b[1][0] - a[1][0])
+        .slice(0, 10);
+
+    console.log("TLA: ", topListenArtists);
+    console.log("TSA: ", topSongArtists);
+    console.log("TS: ", topSongs);
+    topDataRef.current = [topListenArtists, topSongArtists, topSongs];
+  }
+
   // Called with an array of parsed JSON blobs (one per uploaded file)
   function handleFilesLoaded(parsedFiles)
   {
@@ -159,31 +222,42 @@ function App() {
     setCreatedData(mapToJSON());
 
     printTime();
+    findTopVariables();
   }
 
   function handleClear()
   {
     songMapRef.current.clear();
     artistMapRef.current.clear();
+    totalListenTimeRef.current = 0;
     setCreatedData({});
   }
 
   // Usage in React Component
   function printTime() {
-    console.log(totalListenTime);
-    const days = Math.floor(totalListenTime / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((totalListenTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((totalListenTime % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((totalListenTime % (1000 * 60)) / 1000);
+    let time = totalListenTimeRef.current;
+    console.log(totalListenTimeRef.current);
+    const days = Math.floor(time / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((time % (1000 * 60)) / 1000);
 
     console.log(`${days} days, ${hours} hours, ${minutes} minutes, ${seconds}`);
   }
 
   return (
       <div>
-        <FileLoader onFilesLoaded={handleFilesLoaded} />
-        <button onClick={handleClear}>Clear</button>
-        <GraphComponent data={createdData} />
+        <div className="user-options">
+          <FileLoader onFilesLoaded={handleFilesLoaded} />
+          <button onClick={handleClear}>Clear</button>
+        </div>
+        <GraphComponent
+            data={createdData}
+            d3AlphaDecay ={0.01}
+        />
+        <DataComponent
+            data={topDataRef.current}
+        />
       </div>
   )
 }

@@ -1,11 +1,59 @@
-.file-upload
+.user-options
 {
     position: absolute;
+    display: flex;
     left: 10px;
     top: 10px;
     z-index: 1;
 
     color: white;
+
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid white;
+}
+.user-options button
+{
+    border: none;
+    color: black;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+.user-options button:hover
+{
+    background-color: grey;
+    transition: .1s;
+}
+.file-loader input::file-selector-button
+{
+    border: none;
+    color: black;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+.file-loader input::file-selector-button:hover
+{
+    background-color: grey;
+    transition: .1s;
+}
+.data-container
+{
+    position: absolute;
+    left: 10px;
+    top: 60px;
+    z-index: 1;
+
+    color: white;
+    font-size: 12px;
+
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid white;
+    background-color: rgba(0, 0, 0, 0.8);
+
+    width: 300px;
+    height: fit-content;
 }
 .graph-err
 {
