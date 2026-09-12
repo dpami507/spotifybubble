@@ -55,6 +55,12 @@
     width: 300px;
     height: fit-content;
 }
+.data-container h3
+{
+    margin: 0;
+    height: 20px;
+    border-bottom: 1px white solid;
+}
 .graph-err
 {
     margin: 0;

@@ -80,20 +80,29 @@ function DataComponent({data})
 
   return (
       <div className="data-container">
+        <h3>Listen Stats:</h3>
+        <ul>
+          <li>Total Listen Time: <br/> {data[3]}</li>
+          <li>Number of Songs: {data[4]}</li>
+          <li>Number of Artists: {data[5]}</li>
+        </ul>
+
+        <h3>Top Artists (Listen Time)</h3>
         <ol>
-          <h3>Top Artists (Listen Time)</h3>
           {topListenArtists.map((item, index) => (
             <li key={index}>{item[0]} - {Math.round((item[1][0] / 1000) / 60)} min</li>
           ))}
         </ol>
+
+        <h3>Top Artists (Song Count)</h3>
         <ol>
-          <h3>Top Artists (Song Count)</h3>
           {topSongArtists.map((item, index) => (
               <li key={index}>{item[0]} - {item[1][1].length} songs</li>
           ))}
         </ol>
+
+        <h3>Top Songs</h3>
         <ol>
-          <h3>Top Songs</h3>
           {topSongs.map((item, index) => (
               <li key={index}>{item[1][2]} - {item[1][0]}x</li>
           ))}
@@ -107,6 +116,9 @@ function App() {
   const [createdData, setCreatedData] = useState({});
   const totalListenTimeRef = useRef(0);
   const topDataRef = useRef([]);
+
+  const songNodeCountRef = useRef(0);
+  const artistNodeCountRef = useRef(0);
 
   //(trackName + artistName, [playCount, playTime, trackName, artistName])
   const songMapRef = useRef(new Map());
@@ -163,7 +175,7 @@ function App() {
     let nodes = [];
     let links = [];
 
-    nodes.push({id: "origin", name: "origin", val: 1});
+    //nodes.push({id: "origin", name: "origin", val: 1});
 
     artistMap.forEach((data, artist) => {
       let songs = data[1];
@@ -175,7 +187,7 @@ function App() {
         links.push({source: artist, target: song});
       })
 
-      links.push({source: "origin", target: artist});
+      //links.push({source: "origin", target: artist});
     })
 
     songMap.forEach((value, key) => {
@@ -204,10 +216,7 @@ function App() {
         .sort((a, b) => b[1][0] - a[1][0])
         .slice(0, 10);
 
-    console.log("TLA: ", topListenArtists);
-    console.log("TSA: ", topSongArtists);
-    console.log("TS: ", topSongs);
-    topDataRef.current = [topListenArtists, topSongArtists, topSongs];
+    topDataRef.current = [topListenArtists, topSongArtists, topSongs, getTime().toString(), songMapRef.current.size, artistMapRef.current.size];
   }
 
   // Called with an array of parsed JSON blobs (one per uploaded file)
@@ -215,8 +224,6 @@ function App() {
   {
     parsedFiles.forEach((data) => loadDataToMaps(data));
     setCreatedData(mapToJSON());
-
-    printTime();
     findTopVariables();
   }
 
@@ -229,15 +236,14 @@ function App() {
   }
 
   // Usage in React Component
-  function printTime() {
+  function getTime() {
     let time = totalListenTimeRef.current;
-    console.log(totalListenTimeRef.current);
     const days = Math.floor(time / (1000 * 60 * 60 * 24));
     const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((time % (1000 * 60)) / 1000);
 
-    console.log(`${days} days, ${hours} hours, ${minutes} minutes, ${seconds}`);
+    return (`${days}d, ${hours}h, ${minutes}m, ${seconds}s`);
   }
 
   return (
