@@ -1,16 +1,10 @@
-# React + Vite
+# Spotify Universe Generator
+This is a system for users to upload their *extended listening data* (which can be found [here](https://www.spotify.com/us/account/privacy/))  - **Make sure you get "Your Extended streaming history"**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+After uploading songs and artists will be displayed as nodes. Each artist branches out to each of its songs, with shared songs having multiple links to each song, not multiple nodes.
+Hovering over an artist node will display the name of the artist as well as the total song count linked '*ex: Taylor Swift (15)*' to them. Hovering over a song will display how many times it has been played '*ex: Shake It Off (45)*' the size of the node also changes with larger nodes having more plays.
 
-Currently, two official plugins are available:
+After uploading, stats will be shown about all the data including, *Total Listen Time, Number of Unique Songs, Number of Unique Artists, Top Artists based on Listen Time, Top Artists based on Song Count, and Top Songs based on Play Count*.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Example
+![TExample of a Universe.](./src/assets/example.png "This is a sample image.")
